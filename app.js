@@ -102,6 +102,7 @@ if(routeMap&&routePath){
   let pending=false;
   const updateRoute=()=>{pending=false;const rect=routeMap.getBoundingClientRect();let progress;
     if(innerWidth>1050&&stage){const area=stage.getBoundingClientRect();const distance=Math.max(1,area.height-innerHeight);progress=-area.top/distance}
+    else if(innerWidth<=700){const readingLine=innerHeight*.36;progress=(readingLine-rect.top)/Math.max(1,rect.height)}
     else{const start=innerHeight*.8;const finish=-rect.height*.35;progress=(start-rect.top)/(start-finish)}
     targetProgress=Math.max(0,Math.min(1,progress));
     if(!initialized||reducedMotion.matches){shownProgress=targetProgress;velocity=0;initialized=true;paint();return}

@@ -316,3 +316,31 @@
   .gallery-viewport>.gallery-photo strong{font-size:15px}
   .gallery-viewport>.gallery-photo::after{font-size:11px;padding:7px 11px}
 }
+
+/* Compact layouts: legible feature icons and evenly centered trust cards. */
+@media(max-width:1050px){
+  .hero-features i{width:50px;height:50px;flex:0 0 50px}
+  .hero-features i .ui-icon{display:block;width:29px!important;height:29px!important;font-size:29px!important;flex:0 0 29px!important;max-width:none!important;padding:0!important}
+  .trust-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+  .trust-item,.trust-item:nth-child(even),.trust-item:nth-child(3){display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:225px;margin:0;padding:23px!important;border:1px solid #e1e8e2!important;border-radius:18px;background:#fff;box-shadow:0 10px 28px #102f2110}
+  .trust-item .round-icon{flex:none;margin:0 0 18px}
+  .trust-item h3{margin:0 0 9px;font-size:18px;line-height:1.2}
+  .trust-item p{margin:0;font-size:14px;line-height:1.5}
+}
+@media(max-width:700px){
+  .hero-features{gap:14px}
+  .hero-features>span{min-height:50px;gap:13px;font-size:13px}
+  .trust-grid{grid-template-columns:1fr;gap:12px;max-width:520px;margin-inline:auto}
+  .trust-item,.trust-item:nth-child(even),.trust-item:nth-child(3){min-height:0;padding:20px 22px!important}
+  .trust-item .round-icon{margin-bottom:13px}
+  .trust-item h3{font-size:18px}
+  .trust-item p{font-size:13px}
+  .mobile-landmarks image{opacity:.8}
+  .mobile-flag-pole{fill:none;stroke:#073831;stroke-width:4;stroke-linecap:round}
+  .mobile-flag-cloth{fill:#073831;stroke:#073831;stroke-width:2;stroke-linejoin:round}
+  .mobile-flag-base{fill:#ffc540;stroke:#fff;stroke-width:3}
+  .route-steps .map-step>div{position:absolute;left:calc(var(--node-x) + 45px);right:5px;max-width:none;margin-left:0;padding-top:1px}
+  .route-steps .map-step::before{content:"";display:block!important;position:absolute;left:calc(var(--node-x) + 26px);top:24px;width:17px;height:0;border-top:1.5px dashed #dca523;background:none;z-index:1}
+  .route-steps .map-step::after{content:"";display:block!important;position:absolute;left:calc(var(--node-x) + 37px);top:20px;width:6px;height:6px;border-top:1.5px solid #dca523;border-right:1.5px solid #dca523;background:none;transform:rotate(45deg);z-index:1}
+  .route-steps .map-step h3{overflow-wrap:normal}
+}
