@@ -265,7 +265,7 @@
 .tour-difficulty[data-difficulty="Лёгкий"]{background:#e2f2e6;color:#246b41}
 .tour-difficulty[data-difficulty="Средний"]{background:#fff0c9;color:#8f6109}
 .tour-difficulty[data-difficulty="Сложный"]{background:#fbe4e1;color:#ab5149}
-.mobile-route-art{display:none}
+.mobile-route-art,.mobile-map-decor{display:none}
 @media(max-width:1050px){
   .mobile-menu-backdrop:not([hidden]){position:fixed;inset:0;z-index:99;display:block;background:rgba(2,18,15,.58);backdrop-filter:blur(4px);opacity:0;transition:opacity .32s ease}
   .mobile-menu-backdrop.is-open{opacity:1}
@@ -289,26 +289,33 @@
   .hero-features i .ui-icon{font-size:25px}
   .tours-bottom{align-items:center}
   .tours-bottom a{align-self:center;width:max-content;max-width:100%}
-  .route-map{position:relative;overflow:visible!important}
+  .journey-sticky-frame .route-map{position:relative;height:1260px!important;min-height:1260px;overflow:visible!important}
   .route-art{display:none!important}
-  .mobile-route-art{display:block;width:100%;height:auto;overflow:visible}
+  /* The road has its own fixed-width rail: curves never enter the text column. */
+  .mobile-route-art{position:absolute;inset:0 auto auto 0;display:block;width:112px;height:1260px;overflow:visible}
   .mobile-route-art .road-halo{stroke-width:29}
   .mobile-route-art .road-green,.mobile-route-art .road-progress{stroke-width:21}
   .mobile-route-art .road-centerline{stroke-width:1.8;stroke-dasharray:8 9}
   .mobile-route-markers circle{fill:#f7b936;stroke:#fff;stroke-width:6}
   .route-steps{position:absolute!important;inset:0!important;z-index:3;display:block!important;width:100%;margin:0!important}
   .route-steps .map-step{position:absolute!important;left:0!important;top:calc(var(--node-y) - 24px)!important;display:block!important;width:100%!important;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;text-align:left!important}
-  .route-steps .map-step-icon{position:absolute;left:calc(var(--node-x) - 25px);top:0;width:50px;height:50px;margin:0;box-shadow:0 6px 19px #103b2c22}
+  .route-steps .map-step-icon{position:absolute;left:27px;top:0;width:50px;height:50px;margin:0;box-shadow:0 6px 19px #103b2c22}
   .route-steps .map-step-icon .ui-icon{font-size:25px}
-  .route-steps .map-step>div{margin-left:clamp(116px,37vw,146px);padding-top:1px;max-width:calc(100% - clamp(116px,37vw,146px))}
-  .route-steps .map-step h3{font-size:16px;line-height:1.19;margin:3px 0 5px}
-  .route-steps .map-step p{font-size:12px;line-height:1.35;max-width:none}
-  .route-steps .map-step-1{--node-x:21.47%;--node-y:6.19%}
-  .route-steps .map-step-2{--node-x:24.58%;--node-y:20.79%}
-  .route-steps .map-step-3{--node-x:31.92%;--node-y:36.83%}
-  .route-steps .map-step-4{--node-x:23.73%;--node-y:53.1%}
-  .route-steps .map-step-5{--node-x:32.77%;--node-y:69.68%}
-  .route-steps .map-step-6{--node-x:21.47%;--node-y:86.75%}
+  .route-steps .map-step>div{position:absolute;left:110px;right:0;max-width:340px;margin-left:0;padding-top:1px}
+  .route-steps .map-step h3{font-size:17px;line-height:1.25;margin:4px 0 8px;text-wrap:balance;overflow-wrap:normal}
+  .route-steps .map-step p{font-size:13px;line-height:1.5;max-width:none;margin:0;text-wrap:balance}
+  .route-steps .map-step-1{--node-y:78px}
+  .route-steps .map-step-2{--node-y:278px}
+  .route-steps .map-step-3{--node-y:478px}
+  .route-steps .map-step-4{--node-y:678px}
+  .route-steps .map-step-5{--node-y:878px}
+  .route-steps .map-step-6{--node-y:1078px}
+  .mobile-map-decor{display:block;position:absolute;inset:0;pointer-events:none;user-select:none}
+  .mobile-map-decor img{position:absolute;left:118px;object-fit:contain;opacity:.85}
+  .mobile-decor-mountains{top:187px;width:96px;height:45px}
+  .mobile-decor-trees{top:391px;width:73px;height:35px}
+  .mobile-decor-camp{top:786px;width:83px;height:52px}
+  .mobile-decor-forest{top:1190px;width:67px;height:52px}
   .gallery-viewport{scroll-snap-type:none!important;gap:10px;padding:3px 18px 18px}
   .gallery-page{display:contents}
   .gallery-mosaic{display:contents}
@@ -335,12 +342,10 @@
   .trust-item .round-icon{margin-bottom:13px}
   .trust-item h3{font-size:18px}
   .trust-item p{font-size:13px}
-  .mobile-landmarks image{opacity:.8}
   .mobile-flag-pole{fill:none;stroke:#073831;stroke-width:4;stroke-linecap:round}
   .mobile-flag-cloth{fill:#073831;stroke:#073831;stroke-width:2;stroke-linejoin:round}
   .mobile-flag-base{fill:#ffc540;stroke:#fff;stroke-width:3}
-  .route-steps .map-step>div{position:absolute;left:calc(var(--node-x) + 45px);right:5px;max-width:none;margin-left:0;padding-top:1px}
-  .route-steps .map-step::before{content:"";display:block!important;position:absolute;left:calc(var(--node-x) + 26px);top:24px;width:17px;height:0;border-top:1.5px dashed #dca523;background:none;z-index:1}
-  .route-steps .map-step::after{content:"";display:block!important;position:absolute;left:calc(var(--node-x) + 37px);top:20px;width:6px;height:6px;border-top:1.5px solid #dca523;border-right:1.5px solid #dca523;background:none;transform:rotate(45deg);z-index:1}
-  .route-steps .map-step h3{overflow-wrap:normal}
+  .mobile-start-flag .mobile-flag-cloth{fill:#ffc540}
+  .route-steps .map-step::before{content:"";display:block!important;position:absolute;left:79px;top:24px;width:24px;height:0;border-top:1.5px dashed #dca523;background:none;z-index:1}
+  .route-steps .map-step::after{content:"";display:block!important;position:absolute;left:97px;top:20px;width:6px;height:6px;border-top:1.5px solid #dca523;border-right:1.5px solid #dca523;background:none;transform:rotate(45deg);z-index:1}
 }
