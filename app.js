@@ -54,7 +54,7 @@ contactDialog?.querySelector('.dialog-close')?.addEventListener('click',()=>cont
 contactDialog?.addEventListener('click',event=>{if(event.target===contactDialog)contactDialog.close()});
 if(location.hash==='#contact')openContact();
 $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
-  if(link.hasAttribute('data-region')||link.hasAttribute('data-tour-filter'))return;
+  if(link.hasAttribute('data-region')||link.hasAttribute('data-tour-filter')||link.id==='more-reviews')return;
   const id=decodeURIComponent(link.getAttribute('href').slice(1));const target=document.getElementById(id);if(!target)return;
   event.preventDefault();if(id==='contact'){openContact();return}smoothScrollTo(target);
   history.replaceState(null,'','#'+encodeURIComponent(id));
@@ -146,7 +146,7 @@ $$('[data-carousel]').forEach(carousel=>{
 });
 // Supply a verified review-platform URL here when the client chooses the destination.
 const externalReviewsUrl='';
-const moreReviews=$('#more-reviews');if(moreReviews&&externalReviewsUrl){moreReviews.href=externalReviewsUrl;moreReviews.target='_blank';moreReviews.rel='noopener noreferrer';moreReviews.removeAttribute('aria-disabled');moreReviews.removeAttribute('title')}
+const moreReviews=$('#more-reviews');if(moreReviews&&externalReviewsUrl){moreReviews.href=externalReviewsUrl;moreReviews.target='_blank';moreReviews.rel='noopener noreferrer'}else moreReviews?.addEventListener('click',event=>{event.preventDefault();const status=$('#reviews-link-status');if(status)status.hidden=false});
 const faqButtons=$$('.faq-question');
-faqButtons.forEach(button=>{const answer=document.getElementById(button.getAttribute('aria-controls'));button.addEventListener('click',()=>{const expanded=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!expanded));button.closest('.faq-item').classList.toggle('is-open',!expanded);answer.style.maxHeight=expanded?'0px':`${answer.scrollHeight}px`})});
-const resizeFaq=()=>faqButtons.forEach(button=>{if(button.getAttribute('aria-expanded')==='true'){const answer=document.getElementById(button.getAttribute('aria-controls'));answer.style.maxHeight=`${answer.scrollHeight}px`}});addEventListener('resize',resizeFaq);document.fonts?.ready.then(resizeFaq);
+const setFaqOpen=(button,open)=>{button.setAttribute('aria-expanded',String(open));button.closest('.faq-item').classList.toggle('is-open',open);const answer=document.getElementById(button.getAttribute('aria-controls'));if(answer)answer.inert=!open};
+faqButtons.forEach(button=>{setFaqOpen(button,false);button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';faqButtons.forEach(other=>{if(other!==button)setFaqOpen(other,false)});setFaqOpen(button,open)})});
