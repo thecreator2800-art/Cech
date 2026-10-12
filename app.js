@@ -111,27 +111,42 @@ if(routeMap&&routePath){
   addEventListener('scroll',scheduleRoute,{passive:true});addEventListener('resize',()=>{scheduleRoute();updateMapGeometry()});scheduleRoute();updateMapGeometry();document.fonts?.ready.then(updateMapGeometry);
 }
 $$('[data-carousel]').forEach(carousel=>{
-  const track=$('[data-carousel-track]',carousel);const mobileGallery=carousel.classList.contains('gallery-carousel')&&matchMedia('(max-width:700px)').matches;
-  if(mobileGallery&&track)track.replaceChildren(...$$('.gallery-photo',track));
-  const originals=Array.from(track?.children||[]);const next=$('[data-carousel-next]',carousel);
-  if(!track||!originals.length)return;
-  const size=originals.length;const makeCopy=slide=>{const copy=slide.cloneNode(true);copy.removeAttribute('id');copy.setAttribute('aria-hidden','true');return copy};
-  track.prepend(...originals.map(makeCopy));track.append(...originals.map(makeCopy));
-  const slides=Array.from(track.children);const centered=carousel.classList.contains('gallery-carousel')&&!mobileGallery;
-  const position=index=>{const slide=slides[index];const trackRect=track.getBoundingClientRect();const slideRect=slide.getBoundingClientRect();return track.scrollLeft+slideRect.left-trackRect.left-(centered?(track.clientWidth-slide.clientWidth)/2:0)};
-  let drag=null;let buttonScrolling=false;let normalizing=false;
-  const jumpBy=distance=>{normalizing=true;track.classList.add('is-jumping');track.scrollLeft+=distance;if(drag)drag.left+=distance;requestAnimationFrame(()=>{track.classList.remove('is-jumping');normalizing=false})};
-  const normalize=()=>{if(normalizing||buttonScrolling)return;const cycle=slides[size*2].offsetLeft-slides[size].offsetLeft;const middle=position(size);
-    if(track.scrollLeft<middle-cycle*.5)jumpBy(cycle);
-    else if(track.scrollLeft>middle+cycle*1.5)jumpBy(-cycle)};
-  let scrollPending=false;track.addEventListener('scroll',()=>{if(scrollPending)return;scrollPending=true;requestAnimationFrame(()=>{scrollPending=false;normalize()})},{passive:true});
-  track.addEventListener('scrollend',()=>{buttonScrolling=false;normalize()});
-  const go=direction=>{buttonScrolling=true;const distance=slides[size+1].offsetLeft-slides[size].offsetLeft;track.scrollBy({left:distance*direction,behavior:'smooth'})};
-  next?.addEventListener('click',()=>go(1));track.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();go(event.key==='ArrowRight'?1:-1)}});
-  const placeInitially=()=>{track.classList.add('is-jumping');track.scrollLeft=position(size);requestAnimationFrame(()=>track.classList.remove('is-jumping'))};
-  addEventListener('resize',placeInitially);requestAnimationFrame(placeInitially);
-  track.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0)return;drag={x:event.clientX,left:track.scrollLeft};track.classList.add('is-dragging');track.setPointerCapture(event.pointerId)});
-  track.addEventListener('pointermove',event=>{if(!drag)return;track.scrollLeft=drag.left-(event.clientX-drag.x)});
-  const finish=()=>{if(!drag)return;drag=null;track.classList.remove('is-dragging');normalize()};track.addEventListener('pointerup',finish);track.addEventListener('pointercancel',finish);
+  const track=$('[data-carousel-track]',carousel);const next=$('[data-carousel-next]',carousel);
+  if(!track||!track.children.length)return;
+  const gallery=carousel.classList.contains('gallery-carousel');
+  const galleryPages=gallery?Array.from(track.children):null;
+  const galleryPhotos=gallery?$$('.gallery-photo',track):null;
+  const reviewCards=gallery?null:Array.from(track.children);
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  let mobile=false;let slides=[];let size=0;let cycle=0;let middle=0;let drag=null;let animation=null;let frame=0;
+  const cancelAnimation=()=>{cancelAnimationFrame(frame);frame=0;animation=null};
+  const makeCopy=slide=>{const copy=slide.cloneNode(true);copy.removeAttribute('id');copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));copy.setAttribute('aria-hidden','true');copy.inert=true;return copy};
+  // Keep the viewport in the middle copy. Moving one full cycle is visually identical,
+  // including a freely dragged partial slide; no scrollend event or snapping is needed.
+  const normalize=()=>{if(!cycle)return;const offset=track.scrollLeft-middle;const shift=-Math.floor((offset+.5)/cycle)*cycle;if(Math.abs(shift)<1)return;track.scrollLeft+=shift;if(drag)drag.left+=shift;if(animation){animation.from+=shift;animation.to+=shift}};
+  const measure=()=>{if(!slides.length)return;const bounds=track.getBoundingClientRect();const first=slides[size].getBoundingClientRect();cycle=slides[size*2].getBoundingClientRect().left-first.left;middle=track.scrollLeft+first.left-bounds.left-(gallery&&!mobile?(bounds.width-first.width)/2:0)};
+  const rebuild=()=>{
+    cancelAnimation();drag=null;track.classList.remove('is-dragging');mobile=matchMedia('(max-width:700px)').matches;
+    const filledPhotos=new Map($$('.gallery-photo.photo-filled',track).map(photo=>[photo.dataset.photoSlot,photo]));
+    const originals=gallery?(mobile?galleryPhotos:galleryPages).map(slide=>slide.cloneNode(true)):reviewCards;
+    originals.forEach(slide=>{const photos=slide.matches('.gallery-photo')?[slide]:$$('.gallery-photo',slide);photos.forEach(photo=>{const filled=filledPhotos.get(photo.dataset.photoSlot);if(filled){photo.className=filled.className;photo.innerHTML=filled.innerHTML}})});size=originals.length;
+    track.replaceChildren(...originals.map(makeCopy),...originals,...originals.map(makeCopy));slides=Array.from(track.children);measure();track.scrollLeft=middle;
+  };
+  const tick=time=>{if(!animation)return;animation.began??=time;const t=Math.min(1,(time-animation.began)/460);const eased=1-Math.pow(1-t,3);track.scrollLeft=animation.from+(animation.to-animation.from)*eased;normalize();if(t<1)frame=requestAnimationFrame(tick);else{animation=null;frame=0}};
+  const go=direction=>{const remaining=animation?animation.to-track.scrollLeft:0;cancelAnimation();normalize();const distance=slides[size+1].getBoundingClientRect().left-slides[size].getBoundingClientRect().left;if(reducedMotion.matches){track.scrollLeft+=distance*direction;normalize();return}animation={from:track.scrollLeft,to:track.scrollLeft+remaining+distance*direction,began:null};frame=requestAnimationFrame(tick)};
+  next?.addEventListener('click',()=>go(1));
+  track.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();go(event.key==='ArrowRight'?1:-1)}});
+  track.addEventListener('scroll',normalize,{passive:true});
+  track.addEventListener('wheel',cancelAnimation,{passive:true});
+  track.addEventListener('pointerdown',event=>{cancelAnimation();if(event.pointerType!=='mouse'||event.button!==0)return;drag={x:event.clientX,left:track.scrollLeft};track.classList.add('is-dragging');track.setPointerCapture(event.pointerId)});
+  track.addEventListener('pointermove',event=>{if(!drag)return;track.scrollLeft=drag.left-(event.clientX-drag.x);normalize()});
+  const finish=()=>{drag=null;track.classList.remove('is-dragging');normalize()};track.addEventListener('pointerup',finish);track.addEventListener('pointercancel',finish);track.addEventListener('lostpointercapture',finish);
+  let resizeFrame=0;const resize=()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{if(mobile!==matchMedia('(max-width:700px)').matches){rebuild();return}const fraction=cycle?(track.scrollLeft-middle)/cycle:0;cancelAnimation();measure();track.scrollLeft=middle+fraction*cycle;normalize()})};
+  addEventListener('resize',resize);new ResizeObserver(resize).observe(track);rebuild();document.fonts?.ready.then(resize);
 });
-$$('.faq-question').forEach(button=>{const answer=document.getElementById(button.getAttribute('aria-controls'));button.addEventListener('click',()=>{const expanded=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!expanded));button.closest('.faq-item').classList.toggle('is-open',!expanded);answer.style.maxHeight=expanded?'0px':`${answer.scrollHeight}px`})});
+// Supply a verified review-platform URL here when the client chooses the destination.
+const externalReviewsUrl='';
+const moreReviews=$('#more-reviews');if(moreReviews&&externalReviewsUrl){moreReviews.href=externalReviewsUrl;moreReviews.target='_blank';moreReviews.rel='noopener noreferrer';moreReviews.removeAttribute('aria-disabled');moreReviews.removeAttribute('title')}
+const faqButtons=$$('.faq-question');
+faqButtons.forEach(button=>{const answer=document.getElementById(button.getAttribute('aria-controls'));button.addEventListener('click',()=>{const expanded=button.getAttribute('aria-expanded')==='true';button.setAttribute('aria-expanded',String(!expanded));button.closest('.faq-item').classList.toggle('is-open',!expanded);answer.style.maxHeight=expanded?'0px':`${answer.scrollHeight}px`})});
+const resizeFaq=()=>faqButtons.forEach(button=>{if(button.getAttribute('aria-expanded')==='true'){const answer=document.getElementById(button.getAttribute('aria-controls'));answer.style.maxHeight=`${answer.scrollHeight}px`}});addEventListener('resize',resizeFaq);document.fonts?.ready.then(resizeFaq);
