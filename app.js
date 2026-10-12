@@ -31,7 +31,7 @@ let tours=[];let selectedRegion='all';let selectedDifficulty='all';
 const dateLabel=tour=>{if(!tour.startDate)return 'Дата уточняется';const start=new Date(tour.startDate+'T00:00:00');const end=tour.endDate?new Date(tour.endDate+'T00:00:00'):null;const fmt=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short'});return end?`${fmt.format(start)} — ${fmt.format(end)}`:fmt.format(start)};
 const money=value=>Number(value)>0?new Intl.NumberFormat('ru-RU').format(value)+' ₽':'Цена уточняется';
 function tourCard(tour){return `<article class="tour-card"><div class="tour-card-media">${tour.image?`<img src="${escapeHtml(tour.image)}" alt="${escapeHtml(tour.title)}">`:`<div class="media-placeholder"><span class="placeholder-mark">${icon('image-plus')}</span><strong>Фото маршрута</strong><small>Добавьте в управлении турами</small></div>`}<span class="region-tag">${icon('map-pin')}${escapeHtml(tour.region)}</span></div><div class="tour-card-body"><h3>${escapeHtml(tour.title)}</h3><div class="tour-meta"><span>${icon('calendar-days')}<b>${escapeHtml(dateLabel(tour))}</b></span><span>${icon('clock-3')}<b>${escapeHtml(tour.duration||'Уточняется')}</b></span><span class="tour-difficulty" data-difficulty="${escapeHtml(tour.difficulty||'')}">${icon('chart-no-axes-column-increasing')}<b>${escapeHtml(tour.difficulty||'Уточняется')}</b></span></div><div class="tour-card-footer"><div class="tour-price">${tour.price?`<small>от </small>${money(tour.price)}`:money(tour.price)}</div><a class="tour-arrow" href="/tour/${encodeURIComponent(tour.slug)}" aria-label="Подробнее: ${escapeHtml(tour.title)}">${icon('arrow-right')}</a></div></div></article>`}
-function renderTours(){const grid=$('#tour-grid');if(!grid)return;const filtered=tours.filter(tour=>(selectedRegion==='all'||tour.region===selectedRegion)&&(selectedDifficulty==='all'||tour.difficulty===selectedDifficulty));grid.innerHTML=filtered.length?filtered.map(tourCard).join(''):'<div class="tour-empty"><h3>По этому запросу туров пока нет</h3><p>Выберите другое направление или оставьте заявку — поможем найти подходящий маршрут.</p></div>';const count=$('#tour-count');if(count)count.textContent=`${filtered.length} ${filtered.length===1?'тур':filtered.length>=2&&filtered.length<=4?'тура':'туров'}${filtered.some(tour=>tour.demo)?' · демо':''}`;$$('.chip[data-region]').forEach(chip=>chip.classList.toggle('active',chip.dataset.region===selectedRegion));$$('.chip[data-tour-filter]').forEach(chip=>chip.classList.toggle('active',chip.dataset.tourFilter===selectedDifficulty));rewriteStaticLinks()}
+function renderTours(){const grid=$('#tour-grid');if(!grid)return;const filtered=tours.filter(tour=>(selectedRegion==='all'||tour.region===selectedRegion)&&(selectedDifficulty==='all'||tour.difficulty===selectedDifficulty));grid.innerHTML=filtered.length?filtered.map(tourCard).join(''):'<div class="tour-empty"><h3>По этому запросу туров пока нет</h3><p>Выберите другое направление или оставьте заявку — поможем найти подходящий маршрут.</p></div>';const count=$('#tour-count');if(count)count.textContent=`${filtered.length} ${filtered.length===1?'тур':filtered.length>=2&&filtered.length<=4?'тура':'туров'}`;$$('.chip[data-region]').forEach(chip=>chip.classList.toggle('active',chip.dataset.region===selectedRegion));$$('.chip[data-tour-filter]').forEach(chip=>chip.classList.toggle('active',chip.dataset.tourFilter===selectedDifficulty));rewriteStaticLinks()}
 async function loadTours(){try{const res=await fetch(staticPreview?'./data/tours.json':'/api/tours');if(!res.ok)throw new Error('Failed');tours=await res.json();tours.sort((a,b)=>(a.startDate||'9999').localeCompare(b.startDate||'9999'));renderTours();renderTourDetail();rewriteStaticLinks()}catch{const grid=$('#tour-grid');if(grid)grid.innerHTML='<div class="tour-empty">Не удалось загрузить туры. Обновите страницу позже.</div>';const detail=$('#tour-detail');if(detail)detail.innerHTML='<p>Не удалось загрузить информацию о туре.</p>'}}
 if($('#tour-grid')||$('#tour-detail'))loadTours();
 if(!staticPreview&&$('[data-photo-slot]'))fetch('/api/site-images').then(response=>response.json()).then(images=>{$$('[data-photo-slot]').forEach(slot=>{const url=images[slot.dataset.photoSlot];if(!url)return;slot.classList.add('photo-filled');if(slot.classList.contains('panoramic-transition')){slot.style.setProperty('--transition-image',`url(${JSON.stringify(new URL(url,location.href).href)})`);slot.replaceChildren();return}slot.innerHTML=`<img src="${escapeHtml(url)}" alt="${escapeHtml(slot.textContent.trim().replace(/\s+/g,' '))}">`})}).catch(()=>{});
@@ -46,12 +46,19 @@ const contactForm=$('#contact-form');contactForm?.addEventListener('submit',asyn
 rewriteStaticLinks();
 
 const contactDialog=$('#contact');
-const openContact=()=>{if(contactDialog?.showModal&&!contactDialog.open){contactDialog.showModal();setTimeout(()=>contactDialog.querySelector('input')?.focus(),60)}};
+let contactCloseTimer,contactOpenFrame;
+const contactPhoto=contactDialog?.querySelector('.contact-dialog-visual img');
+const warmContactPhoto=()=>contactPhoto?.decode?.().catch(()=>{});
+if('requestIdleCallback' in window)requestIdleCallback(warmContactPhoto,{timeout:1500});else setTimeout(warmContactPhoto,500);
+const openContact=()=>{if(!contactDialog?.showModal)return;clearTimeout(contactCloseTimer);cancelAnimationFrame(contactOpenFrame);if(!contactDialog.open)contactDialog.showModal();contactDialog.querySelector('.dialog-close')?.focus({preventScroll:true});contactOpenFrame=requestAnimationFrame(()=>{contactOpenFrame=requestAnimationFrame(()=>contactDialog.classList.add('is-visible'))})};
+const closeContact=()=>{if(!contactDialog?.open)return;cancelAnimationFrame(contactOpenFrame);contactDialog.classList.remove('is-visible');clearTimeout(contactCloseTimer);contactCloseTimer=setTimeout(()=>contactDialog.close(),matchMedia('(prefers-reduced-motion: reduce)').matches?0:360)};
 // Replace these with the client's actual profile URLs before launch; no visitor is sent to an unrelated account.
 const messengerUrls={max:'',vk:''};
 $$('[data-messenger]').forEach(button=>button.addEventListener('click',()=>{const destination=messengerUrls[button.dataset.messenger];if(destination){window.open(destination,'_blank','noopener,noreferrer')}else{const message=$('#messenger-message');if(message)message.textContent='Ссылка на профиль клиента пока не добавлена. Оставьте телефон — мы свяжемся с вами.'}}));
-contactDialog?.querySelector('.dialog-close')?.addEventListener('click',()=>contactDialog.close());
-contactDialog?.addEventListener('click',event=>{if(event.target===contactDialog)contactDialog.close()});
+contactDialog?.querySelector('.dialog-close')?.addEventListener('click',closeContact);
+contactDialog?.addEventListener('click',event=>{if(event.target===contactDialog)closeContact()});
+contactDialog?.addEventListener('cancel',event=>{event.preventDefault();closeContact()});
+contactDialog?.addEventListener('close',()=>{contactDialog.classList.remove('is-visible');clearTimeout(contactCloseTimer);cancelAnimationFrame(contactOpenFrame)});
 if(location.hash==='#contact')openContact();
 $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
   if(link.hasAttribute('data-region')||link.hasAttribute('data-tour-filter')||link.id==='more-reviews')return;
@@ -146,7 +153,17 @@ $$('[data-carousel]').forEach(carousel=>{
 });
 // Supply a verified review-platform URL here when the client chooses the destination.
 const externalReviewsUrl='';
-const moreReviews=$('#more-reviews');if(moreReviews&&externalReviewsUrl){moreReviews.href=externalReviewsUrl;moreReviews.target='_blank';moreReviews.rel='noopener noreferrer'}else moreReviews?.addEventListener('click',event=>{event.preventDefault();const status=$('#reviews-link-status');if(status)status.hidden=false});
+const moreReviews=$('#more-reviews');if(moreReviews&&externalReviewsUrl){moreReviews.href=externalReviewsUrl;moreReviews.target='_blank';moreReviews.rel='noopener noreferrer'}else moreReviews?.addEventListener('click',event=>event.preventDefault());
 const faqButtons=$$('.faq-question');
-const setFaqOpen=(button,open)=>{button.setAttribute('aria-expanded',String(open));button.closest('.faq-item').classList.toggle('is-open',open);const answer=document.getElementById(button.getAttribute('aria-controls'));if(answer)answer.inert=!open};
-faqButtons.forEach(button=>{setFaqOpen(button,false);button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';faqButtons.forEach(other=>{if(other!==button)setFaqOpen(other,false)});setFaqOpen(button,open)})});
+const faqAnimations=new WeakMap();
+const setFaqOpen=(button,open,animate=true)=>{
+  const answer=document.getElementById(button.getAttribute('aria-controls'));if(!answer)return;
+  const currentHeight=answer.getBoundingClientRect().height;faqAnimations.get(answer)?.cancel();
+  button.setAttribute('aria-expanded',String(open));button.closest('.faq-item').classList.toggle('is-open',open);answer.inert=!open;
+  const targetHeight=open?answer.querySelector('.faq-answer-inner').scrollHeight:0;
+  answer.style.height=open?'auto':'0px';
+  if(!animate||!answer.animate)return;
+  const animation=answer.animate([{height:`${currentHeight}px`},{height:`${targetHeight}px`}],{duration:matchMedia('(prefers-reduced-motion: reduce)').matches?140:560,easing:'cubic-bezier(.22,.65,.3,1)'});
+  faqAnimations.set(answer,animation);animation.onfinish=()=>faqAnimations.delete(answer);
+};
+faqButtons.forEach(button=>{setFaqOpen(button,false,false);button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';faqButtons.forEach(other=>{if(other!==button&&other.getAttribute('aria-expanded')==='true')setFaqOpen(other,false)});setFaqOpen(button,open)})});

@@ -401,13 +401,13 @@
 @media(max-width:700px){:root{--section-title-size:clamp(43px,10vw,60px);--section-lead-size:16px;--transition-heading-gap:26px}}
 
 /* Real vector arrows, with clear hover, keyboard and press feedback. */
-.button .button-arrow{width:24px;height:24px;vertical-align:0;transition:transform .2s}
+.button .button-arrow{width:24px;height:24px;vertical-align:0;transform:none;transition:none}
 .hero-buttons .button-arrow{width:27px;height:27px}
-.button:hover .button-arrow{transform:translateX(3px)}
-.button,.tour-arrow,.carousel-arrow,.contact-messenger,.faq-question,.messengers a,.chip,.menu-toggle,.dialog-close,.mobile-nav-close{transition:transform .18s,background-color .2s,border-color .2s,box-shadow .2s}
-.button:active,.tour-arrow:active,.carousel-arrow:active,.contact-messenger:active,.faq-question:active,.messengers a:active,.chip:active,.menu-toggle:active,.dialog-close:active,.mobile-nav-close:active{transform:translateY(1px) scale(.98)}
+.button:hover .button-arrow{transform:none}
+.button,.tour-arrow,.carousel-arrow,.contact-messenger,.messengers a,.chip,.menu-toggle,.dialog-close,.mobile-nav-close{transition:transform .32s cubic-bezier(.22,.7,.3,1),background-color .32s ease,border-color .32s ease,box-shadow .32s ease}
+.button:hover{transform:translateY(-1px)}
+.button:active,.tour-arrow:active,.carousel-arrow:active,.contact-messenger:active,.messengers a:active,.chip:active,.menu-toggle:active,.dialog-close:active,.mobile-nav-close:active{transform:translateY(0) scale(.992)}
 .button:focus-visible,.faq-question:focus-visible,.tour-arrow:focus-visible,.carousel-arrow:focus-visible{outline:3px solid #dba429;outline-offset:4px}
-.reviews-link-status{font-size:13px;line-height:1.5;color:#68747e;margin:12px 0 0;max-width:300px}
 
 /* Compact question cards; intrinsic grid expansion animates in both directions. */
 .faq-layout{display:block}
@@ -419,14 +419,28 @@
 .faq-item{border:1px solid #dce3dd;border-radius:14px;background:#ffffffa6;overflow:hidden;transition:background-color .25s,border-color .25s,box-shadow .25s}
 .faq-item.is-open{background:#fff;border-color:#9fb6a9;box-shadow:0 8px 24px -14px #12352a30}
 .faq-question{padding:18px 20px;font-size:16px;font-weight:700;line-height:1.4;min-height:80px;gap:18px;cursor:pointer}
-.faq-question:hover{background:#edf2ed}
+.faq-question,.faq-question:hover,.faq-question:active{transform:none;background:transparent;transition:none}
+@media(hover:hover){.faq-item:hover{background:#f0f4f0}.faq-item.is-open:hover{background:#f0f4f0}}
 .faq-question:focus-visible{outline-offset:-4px;border-radius:14px}
-.faq-answer{display:grid;grid-template-rows:0fr;max-height:none;overflow:visible;opacity:0;transition:grid-template-rows .48s cubic-bezier(.22,.7,.3,1),opacity .3s ease}
-.faq-item.is-open .faq-answer{grid-template-rows:1fr;opacity:1}
+.faq-answer{display:block;height:0;max-height:none;overflow:hidden;opacity:1;transition:none}
+.faq-item.is-open .faq-answer{opacity:1}
 .faq-answer-inner{min-height:0;overflow:hidden}
 .faq-answer p{font-size:15px;line-height:1.6;margin:0;padding:0 20px 22px;color:#65737a;text-wrap:pretty}
 .faq-toggle{width:34px;height:34px}
 .faq-toggle::before,.faq-toggle::after{left:8px;top:14px}
 @media(max-width:1050px){.faq-heading>.button{justify-self:start}.faq-heading{gap:24px}}
 @media(max-width:700px){.faq-list{grid-template-columns:1fr;gap:12px}.faq-question{padding:17px 16px;font-size:15px;min-height:72px;gap:12px}.faq-answer p{font-size:14px;padding:0 16px 20px}.faq-heading{margin-bottom:26px}}
-@media(prefers-reduced-motion:reduce){.faq-answer,.faq-toggle,.faq-item,.button,.button .button-arrow{transition:none}}
+/* Native modal: animate only composited opacity/transform, not a blurred page. */
+.contact-dialog[open]{animation:none;opacity:0;transform:translate3d(0,12px,0) scale(.992);transition:opacity .32s ease,transform .36s cubic-bezier(.22,.7,.3,1);will-change:opacity,transform}
+.contact-dialog[open].is-visible{opacity:1;transform:translate3d(0,0,0) scale(1)}
+.contact-dialog::backdrop{background:rgba(3,22,18,.7);backdrop-filter:none;opacity:0;transition:opacity .32s ease}
+.contact-dialog.is-visible::backdrop{opacity:1}
+
+/* The quiet mountain-and-contour band is decorative, not a draggable image. */
+.reviews-section{padding-bottom:20px}
+.reviews-faq-transition{height:clamp(160px,14vw,265px);background:#f7f8f6 url('assets/transition-reviews-faq.png') center 43%/100% auto no-repeat;pointer-events:none;user-select:none;-webkit-user-select:none;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 84%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 84%,transparent)}
+.faq-section{padding-top:18px}
+.review-intro .eyebrow{white-space:nowrap;letter-spacing:.14em}
+.review-intro .eyebrow-line{width:32px;margin-left:10px}
+@media(max-width:700px){.reviews-section{padding-bottom:12px}.reviews-faq-transition{height:130px;background-size:auto 200px}.faq-section{padding-top:22px}}
+@media(prefers-reduced-motion:reduce){.faq-answer,.faq-toggle,.faq-item,.button,.button .button-arrow,.contact-dialog[open],.contact-dialog::backdrop{transition:none}}
