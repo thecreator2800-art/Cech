@@ -1,1 +1,82 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071d19"><meta name="description" content="Каталог походов и активных путешествий Спортивного цеха."><title>Все туры — Спортивный цех</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%23071d19'/%3E%3Cpath d='M7 45 27 15l9 13 6-7 16 24H43L27 24 14 45Z' fill='%23ffc540'/%3E%3Cpath d='M8 50c14-10 31-10 48 0' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"><link rel="stylesheet" href="./styles.css?v=22a50ba457"><script>window.STATIC_PREVIEW=true</script><script defer src="./app.js?v=22a50ba457"></script></head><body><header class="site-header"><div class="header-inner container"><a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 80 55" aria-hidden="true"><path d="M5 43 32 5l13 19 8-10 22 29H55L32 18 16 43Z" fill="#ffc540"/><path d="M5 48c21-13 48-14 70-1" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg><span class="brand-text"><strong>СПОРТИВНЫЙ ЦЕХ</strong><small>КЛУБ АКТИВНЫХ ПУТЕШЕСТВИЙ</small></span></a><nav class="desktop-nav" aria-label="Основное меню"><a href="/tours">Туры</a><a href="/#about">О клубе</a><a href="/#guides">Гиды</a><a href="/#reviews">Отзывы</a><a href="/#faq">Вопросы</a></nav><div class="header-actions"><div class="header-phone"><strong>+7 (900) 000-00-00</strong><span>Ежедневно 09:00–20:00</span></div><a class="button button-gold header-cta" href="/#contact">Подобрать тур →</a></div><button class="menu-toggle" type="button" aria-label="Открыть меню" aria-expanded="false"><span></span><span></span><span></span></button></div><nav class="mobile-nav" aria-label="Мобильное меню" hidden><a href="./">Главная</a><a href="/tours">Туры</a><a href="/#guides">Гиды</a><a href="/#contact">Контакты</a></nav></header><main><section class="catalog-hero"><div class="container"><p class="eyebrow">МАРШРУТЫ СПОРТИВНОГО ЦЕХА</p><h1>Все <em>путешествия</em></h1><p>Выберите тур по направлению и уровню сложности. Подробности программы — на странице каждого путешествия.</p></div></section><section class="section tours-section topo" id="tours"><div class="container"><div class="tour-toolbar"><div class="filter-chips" role="group" aria-label="Направление"><button type="button" class="chip active" data-region="all">Все направления</button><button type="button" class="chip" data-region="Кабардино-Балкария">Кабардино-Балкария</button><button type="button" class="chip" data-region="Северная Осетия">Северная Осетия</button><button type="button" class="chip" data-region="Воронежская область">Воронежская область</button></div><span class="tour-count" id="tour-count"></span></div><div class="tour-grid" id="tour-grid" aria-live="polite"></div></div></section><section class="catalog-contact"><div class="container"><h2>Не знаете, с чего начать?</h2><p>Расскажите о своей подготовке, и мы поможем выбрать маршрут.</p><a class="button button-gold" href="/#contact">Подобрать тур →</a></div></section></main><footer class="footer"><div class="container"><div class="footer-bottom"><span>© <span id="year"></span> Спортивный цех</span><a href="./">Главная</a><span class="footer-tagline">Активные путешествия по России и за её пределами</span></div></div></footer></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071d19">
+  <meta name="description" content="Все путешествия Спортивного цеха: выберите поход, треккинг или восхождение по направлению, сложности, датам и стоимости.">
+  <title>Все путешествия — Спортивный цех</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%23071d19'/%3E%3Cpath d='M7 45 27 15l9 13 6-7 16 24H43L27 24 14 45Z' fill='%23ffc540'/%3E%3Cpath d='M8 50c14-10 31-10 48 0' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css?v=be82331e57">
+  <script>window.STATIC_PREVIEW=true</script><script defer src="./app.js?v=be82331e57"></script>
+</head>
+<body class="catalog-page">
+  <header class="site-header" id="top">
+    <div class="header-inner container">
+      <a class="brand" href="./" aria-label="Спортивный цех — на главную">
+        <svg class="brand-mark" viewBox="0 0 80 55" aria-hidden="true"><path d="M5 43 32 5l13 19 8-10 22 29H55L32 18 16 43Z" fill="#ffc540"/><path d="M5 48c21-13 48-14 70-1" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+        <span class="brand-text"><strong>СПОРТИВНЫЙ ЦЕХ</strong><small>КЛУБ АКТИВНЫХ ПУТЕШЕСТВИЙ</small></span>
+      </a>
+      <div class="messengers header-messengers" aria-label="Мессенджеры"><a href="#contact" aria-label="Telegram — связаться"><span class="ui-icon icon-telegram" aria-hidden="true"></span></a><a href="#contact" aria-label="MAX — связаться"><span class="ui-icon icon-max" aria-hidden="true"></span></a><a href="#contact" aria-label="ВКонтакте — связаться"><span class="ui-icon icon-vk" aria-hidden="true"></span></a></div>
+      <nav class="desktop-nav" aria-label="Основное меню">
+        <details class="nav-dropdown"><summary>Туры <span class="chevron">⌄</span></summary><div class="nav-popover"><a href="/tours">Все туры</a><a href="#tours" data-tour-filter="Лёгкий">Для первого похода</a><a href="#tours" data-tour-filter="Средний">Походы средней сложности</a><a href="#tours" data-tour-filter="Сложный">Восхождения</a></div></details>
+        <details class="nav-dropdown"><summary>Направления <span class="chevron">⌄</span></summary><div class="nav-popover"><a href="#tours" data-region="all">Все направления</a><a href="#tours" data-region="Кабардино-Балкария">Кабардино-Балкария</a><a href="#tours" data-region="Северная Осетия">Северная Осетия</a><a href="#tours" data-region="Воронежская область">Воронежская область</a></div></details>
+        <a href="#catalog-filters">Календарь</a>
+        <a href="/#about">О клубе</a>
+        <a href="/#reviews">Отзывы</a>
+      </nav>
+      <div class="header-actions">
+        <div class="header-phone"><strong>+7 (900) 000-00-00</strong><span>Ежедневно 09:00–20:00</span></div>
+        <a class="button button-gold header-cta" href="#contact">Подобрать тур <span aria-hidden="true">→</span></a>
+      </div>
+      <button class="menu-toggle" type="button" aria-label="Открыть меню" aria-controls="mobile-menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <div class="mobile-menu-backdrop" hidden></div>
+  <nav class="mobile-nav" id="mobile-menu" aria-label="Мобильное меню" hidden><div class="mobile-nav-top"><span>МЕНЮ</span><button class="mobile-nav-close" type="button" aria-label="Закрыть меню">×</button></div><a href="#tours">Туры</a><a href="#catalog-filters">Направления</a><a href="/#about">О клубе</a><a href="/#guides">Гиды</a><a href="/#reviews">Отзывы</a><a href="/#faq">Вопросы</a><a href="#contact">Контакты</a><div class="messengers mobile-messengers" aria-label="Мессенджеры"><a href="#contact" aria-label="Telegram — связаться"><span class="ui-icon icon-telegram" aria-hidden="true"></span></a><a href="#contact" aria-label="MAX — связаться"><span class="ui-icon icon-max" aria-hidden="true"></span></a><a href="#contact" aria-label="ВКонтакте — связаться"><span class="ui-icon icon-vk" aria-hidden="true"></span></a></div></nav>
+
+
+  <main id="top">
+    <section class="catalog-intro" aria-labelledby="catalog-title">
+      <div class="container">
+        <nav class="catalog-breadcrumbs" aria-label="Хлебные крошки"><a href="./">Главная</a><span aria-hidden="true">/</span><span aria-current="page">Все путешествия</span></nav>
+        <div class="catalog-intro-content">
+          <div class="catalog-intro-copy">
+            <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span>НАЙДИТЕ СВОЙ МАРШРУТ</p>
+            <h1 id="catalog-title">Все <em>путешествия</em></h1>
+            <p>Походы, треккинги и восхождения — выберите путешествие под свою подготовку и свободные даты.</p>
+          </div>
+          <div class="catalog-header-art" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+    <section class="catalog-results" id="tours" aria-label="Каталог путешествий">
+      <div class="container">
+        <form class="catalog-filters" id="catalog-filters" aria-label="Фильтры путешествий" novalidate>
+          <label class="catalog-select-field"><span class="ui-icon icon-map-pin" aria-hidden="true"></span><span class="catalog-field-copy"><span class="catalog-field-label">Направление</span><select id="catalog-region" name="region"><option value="all">Все направления</option></select></span><span class="ui-icon icon-chevron-down" aria-hidden="true"></span></label>
+          <label class="catalog-select-field"><span class="ui-icon icon-chart-no-axes-column-increasing" aria-hidden="true"></span><span class="catalog-field-copy"><span class="catalog-field-label">Сложность</span><select id="catalog-difficulty" name="difficulty"><option value="all">Любая сложность</option><option value="Лёгкий">Лёгкий</option><option value="Средний">Средний</option><option value="Сложный">Сложный</option></select></span><span class="ui-icon icon-chevron-down" aria-hidden="true"></span></label>
+          <details class="catalog-range catalog-dates">
+            <summary><span class="ui-icon icon-calendar-days" aria-hidden="true"></span><span class="catalog-field-copy"><span class="catalog-field-label">Даты поездки</span><span class="catalog-field-value" id="catalog-dates-value">Любые даты</span></span><span class="ui-icon icon-chevron-down" aria-hidden="true"></span></summary>
+            <div class="catalog-range-popover"><p class="catalog-popover-title">Период путешествия</p><div class="catalog-range-inputs"><label>С<input id="catalog-date-from" name="from" type="date"></label><label>По<input id="catalog-date-to" name="to" type="date"></label></div><p class="catalog-popover-help">Покажем поездки, пересекающиеся с выбранным периодом.</p><button class="catalog-range-done" type="button" data-close-catalog-range>Готово<span class="ui-icon icon-arrow-right" aria-hidden="true"></span></button></div>
+          </details>
+          <details class="catalog-range catalog-price">
+            <summary><span class="ui-icon icon-wallet" aria-hidden="true"></span><span class="catalog-field-copy"><span class="catalog-field-label">Стоимость</span><span class="catalog-field-value" id="catalog-price-value">Любая стоимость</span></span><span class="ui-icon icon-chevron-down" aria-hidden="true"></span></summary>
+            <div class="catalog-range-popover"><p class="catalog-popover-title">Стоимость тура, ₽</p><div class="catalog-range-inputs"><label>От<input id="catalog-price-min" name="min" type="number" inputmode="numeric" min="0" step="100" placeholder="Неважно"></label><label>До<input id="catalog-price-max" name="max" type="number" inputmode="numeric" min="0" step="100" placeholder="Неважно"></label></div><p class="catalog-popover-help">Укажите удобный диапазон стоимости за одного участника.</p><button class="catalog-range-done" type="button" data-close-catalog-range>Готово<span class="ui-icon icon-arrow-right" aria-hidden="true"></span></button></div>
+          </details>
+          <button class="catalog-reset" type="button" data-reset-catalog><span class="ui-icon icon-rotate-ccw" aria-hidden="true"></span><span>Сбросить фильтры</span></button>
+          <label class="catalog-select-field catalog-sort"><span class="ui-icon icon-arrow-up-down" aria-hidden="true"></span><span class="catalog-field-copy"><span class="visually-hidden">Сортировка</span><select id="catalog-sort" name="sort"><option value="date">Ближайшие даты</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select></span><span class="ui-icon icon-chevron-down" aria-hidden="true"></span></label>
+          <p class="catalog-filter-message" id="catalog-filter-message" role="alert" hidden></p>
+        </form>
+        <p class="visually-hidden" id="catalog-results-status" role="status"></p>
+        <div class="tour-grid catalog-tour-grid" id="tour-grid" aria-busy="true"><p class="catalog-loading">Загружаем путешествия…</p></div>
+        <noscript><p>Для фильтрации путешествий включите JavaScript в браузере.</p></noscript>
+      </div>
+    </section>
+    <section class="catalog-help" aria-labelledby="catalog-help-title">
+      <div class="container catalog-help-content"><div><h2 id="catalog-help-title">Не знаете, какой тур выбрать?</h2><p>Поможем подобрать путешествие под вашу подготовку.</p></div><a class="button button-gold" href="#contact">Подобрать тур<span class="ui-icon icon-arrow-right button-arrow" aria-hidden="true"></span></a></div>
+    </section>
+  </main>
+  <dialog class="contact-dialog" id="contact" aria-labelledby="contact-title"><div class="contact-dialog-inner"><button class="dialog-close" type="button" aria-label="Закрыть форму">×</button><div class="contact-dialog-main"><div class="contact-dialog-copy"><p class="eyebrow">ПОДБЕРЁМ ВАШ МАРШРУТ</p><h2 id="contact-title">Сначала —<br><em>поговорим о путешествии</em></h2><p>Напишите в удобном мессенджере или оставьте телефон — поможем выбрать поездку под ваш опыт и даты.</p></div><div class="contact-messenger-options"><button type="button" class="contact-messenger contact-messenger-max" data-messenger="max"><span class="ui-icon icon-max" aria-hidden="true"></span>Написать в MAX</button><button type="button" class="contact-messenger contact-messenger-vk" data-messenger="vk"><span class="ui-icon icon-vk" aria-hidden="true"></span>Написать ВКонтакте</button></div><div class="contact-divider"><span>или оставьте номер для звонка</span></div><form id="contact-form" class="contact-form"><label class="visually-hidden" for="contact-phone">Номер телефона</label><input id="contact-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="40" placeholder="+7 (___) ___-__-__"><input type="hidden" name="interest" value="Подбор маршрута"><button class="button button-gold" type="submit">Получить консультацию <span aria-hidden="true">→</span></button><small><a href="/privacy" target="_blank" rel="noopener">Нажимая кнопку, вы соглашаетесь на обработку контактных данных<br>для ответа на заявку.</a></small><p class="form-message" id="form-message" role="status"></p></form><p class="messenger-message" id="messenger-message" role="status"></p></div><div class="contact-dialog-visual"><img src="./assets/consultation-hikers.png" alt="Туристы смотрят на горную долину"></div></div></dialog>
+  <footer class="footer"><div class="container"><div class="footer-main"><div><a class="brand" href="./"><svg class="brand-mark" viewBox="0 0 80 55" aria-hidden="true"><path d="M5 43 32 5l13 19 8-10 22 29H55L32 18 16 43Z" fill="#ffc540"/><path d="M5 48c21-13 48-14 70-1" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg><span class="brand-text"><strong>СПОРТИВНЫЙ ЦЕХ</strong><small>КЛУБ АКТИВНЫХ ПУТЕШЕСТВИЙ</small></span></a><p>Походы, треккинги и путешествия, к которым хочется возвращаться.</p><div class="messengers footer-messengers" aria-label="Связаться с клубом"><a href="#contact" aria-label="Telegram — связаться"><span class="ui-icon icon-telegram" aria-hidden="true"></span></a><a href="#contact" aria-label="MAX — связаться"><span class="ui-icon icon-max" aria-hidden="true"></span></a><a href="#contact" aria-label="ВКонтакте — связаться"><span class="ui-icon icon-vk" aria-hidden="true"></span></a></div></div><div><strong>Сайт</strong><a href="/#tours">Ближайшие туры</a><a href="/#about">О клубе</a><a href="/#guides">Команда</a><a href="/#reviews">Отзывы</a></div><div><strong>Информация</strong><a href="/#process">Как всё проходит</a><a href="/#faq">Частые вопросы</a><a href="#contact">Подобрать тур</a><a href="/privacy" target="_blank" rel="noopener">Политика конфиденциальности</a></div><div><strong>На связи</strong><span>+7 (900) 000-00-00</span><span>Ежедневно 09:00–20:00</span><span>Контакты будут уточнены</span></div></div><div class="footer-bottom"><span>© <span id="year"></span> Спортивный цех</span><span class="footer-tagline">Активные путешествия по России и за её пределами</span></div></div></footer>
+</body>
+</html>

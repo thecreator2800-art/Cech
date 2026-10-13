@@ -28,14 +28,94 @@ addEventListener('resize',()=>{if(innerWidth>1050&&menuButton?.getAttribute('ari
 $('#year')?.replaceChildren(document.createTextNode(new Date().getFullYear()));
 
 let tours=[];let selectedRegion='all';let selectedDifficulty='all';
+const catalogFilters=$('#catalog-filters');
+const catalogState={from:'',to:'',min:'',max:'',sort:'date'};
+function syncCatalogControls(){
+  if(!catalogFilters)return;
+  $('#catalog-region').value=selectedRegion;$('#catalog-difficulty').value=selectedDifficulty;$('#catalog-sort').value=catalogState.sort;
+  [['#catalog-date-from','from'],['#catalog-date-to','to'],['#catalog-price-min','min'],['#catalog-price-max','max']].forEach(([selector,key])=>{$(selector).value=catalogState[key]});
+  const shortDate=value=>new Date(value+'T00:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
+  const dates=catalogState.from&&catalogState.to?`${shortDate(catalogState.from)} — ${shortDate(catalogState.to)}`:catalogState.from?`С ${shortDate(catalogState.from)}`:catalogState.to?`До ${shortDate(catalogState.to)}`:'Любые даты';
+  const number=value=>Number(value).toLocaleString('ru-RU');
+  const price=catalogState.min&&catalogState.max?`${number(catalogState.min)}–${number(catalogState.max)} ₽`:catalogState.min?`От ${number(catalogState.min)} ₽`:catalogState.max?`До ${number(catalogState.max)} ₽`:'Любая стоимость';
+  $('#catalog-dates-value').textContent=dates;$('#catalog-price-value').textContent=price;
+  $('#catalog-dates-value').title=[catalogState.from,catalogState.to].filter(Boolean).join(' — ');$('#catalog-price-value').title=price;
+  $$('[data-reset-catalog]',catalogFilters).forEach(button=>button.disabled=selectedRegion==='all'&&selectedDifficulty==='all'&&!catalogState.from&&!catalogState.to&&!catalogState.min&&!catalogState.max&&catalogState.sort==='date');
+}
+function validateCatalogFilters(){
+  if(!catalogFilters)return true;
+  const datesInvalid=Boolean(catalogState.from&&catalogState.to&&catalogState.from>catalogState.to);
+  const priceNegative=[catalogState.min,catalogState.max].some(value=>value!==''&&Number(value)<0);
+  const priceInvalid=Boolean(catalogState.min!==''&&catalogState.max!==''&&Number(catalogState.min)>Number(catalogState.max));
+  const error=datesInvalid?'Дата «По» не должна быть раньше даты «С».':priceNegative?'Стоимость не может быть отрицательной.':priceInvalid?'Стоимость «До» не должна быть меньше стоимости «От».':'';
+  const message=$('#catalog-filter-message');message.textContent=error;message.hidden=!error;
+  ['#catalog-date-from','#catalog-date-to'].forEach(selector=>$(selector).setAttribute('aria-invalid',String(datesInvalid)));
+  ['#catalog-price-min','#catalog-price-max'].forEach(selector=>$(selector).setAttribute('aria-invalid',String(priceNegative||priceInvalid)));
+  return !error;
+}
+function updateCatalogUrl(){
+  if(!catalogFilters)return;
+  const url=new URL(location.href),values={region:selectedRegion==='all'?'':selectedRegion,difficulty:selectedDifficulty==='all'?'':selectedDifficulty,...catalogState,sort:catalogState.sort==='date'?'':catalogState.sort};
+  Object.entries(values).forEach(([key,value])=>{if(value!=='')url.searchParams.set(key,value);else url.searchParams.delete(key)});history.replaceState(null,'',url);
+}
+function resetCatalogFilters(){
+  selectedRegion='all';selectedDifficulty='all';Object.assign(catalogState,{from:'',to:'',min:'',max:'',sort:'date'});$$('.catalog-range').forEach(detail=>detail.open=false);renderTours();
+}
+function initializeCatalogFilters(){
+  if(!catalogFilters)return;
+  const regionSelect=$('#catalog-region'),regions=[...new Set(tours.map(tour=>tour.region).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));
+  regionSelect.replaceChildren(new Option('Все направления','all'),...regions.map(region=>new Option(region,region)));
+  const params=new URL(location.href).searchParams;
+  selectedRegion=regions.includes(params.get('region'))?params.get('region'):'all';selectedDifficulty=['Лёгкий','Средний','Сложный'].includes(params.get('difficulty'))?params.get('difficulty'):'all';
+  catalogState.sort=['date','price-asc','price-desc'].includes(params.get('sort'))?params.get('sort'):'date';
+  [['#catalog-date-from','from'],['#catalog-date-to','to']].forEach(([selector,key])=>{const field=$(selector);field.value=params.get(key)||'';catalogState[key]=field.value});
+  ['min','max'].forEach(key=>{const value=params.get(key);catalogState[key]=value!==null&&value!==''&&Number.isFinite(Number(value))&&Number(value)>=0?String(Number(value)):''});
+  if(catalogState.from&&catalogState.to&&catalogState.from>catalogState.to){catalogState.from='';catalogState.to=''}
+  if(catalogState.min!==''&&catalogState.max!==''&&Number(catalogState.min)>Number(catalogState.max)){catalogState.min='';catalogState.max=''}
+  syncCatalogControls();
+}
+if(catalogFilters){
+  const apply=()=>{selectedRegion=$('#catalog-region').value;selectedDifficulty=$('#catalog-difficulty').value;catalogState.sort=$('#catalog-sort').value;catalogState.from=$('#catalog-date-from').value;catalogState.to=$('#catalog-date-to').value;catalogState.min=$('#catalog-price-min').value;catalogState.max=$('#catalog-price-max').value;$$('[data-reset-catalog]',catalogFilters).forEach(button=>button.disabled=false);if(validateCatalogFilters())renderTours()};
+  catalogFilters.addEventListener('input',apply);catalogFilters.addEventListener('submit',event=>{event.preventDefault();apply();if(validateCatalogFilters())$$('.catalog-range').forEach(detail=>detail.open=false)});
+  catalogFilters.addEventListener('click',event=>{if(event.target.closest('[data-reset-catalog]'))resetCatalogFilters();const close=event.target.closest('[data-close-catalog-range]');if(close&&validateCatalogFilters()){const detail=close.closest('details');detail.open=false;detail.querySelector('summary').focus()}});
+  $$('.catalog-range').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open)$$('.catalog-range').forEach(other=>{if(other!==detail)other.open=false})}));
+  document.addEventListener('pointerdown',event=>{if(!event.target.closest('.catalog-range'))$$('.catalog-range').forEach(detail=>detail.open=false)});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')$$('.catalog-range').forEach(detail=>detail.open=false)});
+  $('#tour-grid').addEventListener('click',event=>{if(event.target.closest('[data-reset-catalog]'))resetCatalogFilters()});
+}
 const dateLabel=tour=>{if(!tour.startDate)return 'Дата уточняется';const start=new Date(tour.startDate+'T00:00:00');const end=tour.endDate?new Date(tour.endDate+'T00:00:00'):null;const fmt=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short'});return end?`${fmt.format(start)} — ${fmt.format(end)}`:fmt.format(start)};
 const money=value=>Number(value)>0?new Intl.NumberFormat('ru-RU').format(value)+' ₽':'Цена уточняется';
 function tourCard(tour){return `<article class="tour-card"><div class="tour-card-media">${tour.image?`<img src="${escapeHtml(tour.image)}" alt="${escapeHtml(tour.title)}">`:`<div class="media-placeholder"><span class="placeholder-mark">${icon('image-plus')}</span><strong>Фото маршрута</strong><small>Добавьте в управлении турами</small></div>`}<span class="region-tag">${icon('map-pin')}${escapeHtml(tour.region)}</span></div><div class="tour-card-body"><h3>${escapeHtml(tour.title)}</h3><div class="tour-meta"><span>${icon('calendar-days')}<b>${escapeHtml(dateLabel(tour))}</b></span><span>${icon('clock-3')}<b>${escapeHtml(tour.duration||'Уточняется')}</b></span><span class="tour-difficulty" data-difficulty="${escapeHtml(tour.difficulty||'')}">${icon('chart-no-axes-column-increasing')}<b>${escapeHtml(tour.difficulty||'Уточняется')}</b></span></div><div class="tour-card-footer"><div class="tour-price">${tour.price?`<small>от </small>${money(tour.price)}`:money(tour.price)}</div><a class="tour-arrow" href="/tour/${encodeURIComponent(tour.slug)}" aria-label="Подробнее: ${escapeHtml(tour.title)}">${icon('arrow-right')}</a></div></div></article>`}
-function renderTours(){const grid=$('#tour-grid');if(!grid)return;const filtered=tours.filter(tour=>(selectedRegion==='all'||tour.region===selectedRegion)&&(selectedDifficulty==='all'||tour.difficulty===selectedDifficulty));grid.innerHTML=filtered.length?filtered.map(tourCard).join(''):'<div class="tour-empty"><h3>По этому запросу туров пока нет</h3><p>Выберите другое направление или оставьте заявку — поможем найти подходящий маршрут.</p></div>';const count=$('#tour-count');if(count)count.textContent=`${filtered.length} ${filtered.length===1?'тур':filtered.length>=2&&filtered.length<=4?'тура':'туров'}`;$$('.chip[data-region]').forEach(chip=>chip.classList.toggle('active',chip.dataset.region===selectedRegion));$$('.chip[data-tour-filter]').forEach(chip=>chip.classList.toggle('active',chip.dataset.tourFilter===selectedDifficulty));rewriteStaticLinks()}
-async function loadTours(){try{const res=await fetch(staticPreview?'./data/tours.json':'/api/tours');if(!res.ok)throw new Error('Failed');tours=await res.json();tours.sort((a,b)=>(a.startDate||'9999').localeCompare(b.startDate||'9999'));renderTours();renderTourDetail();rewriteStaticLinks()}catch{const grid=$('#tour-grid');if(grid)grid.innerHTML='<div class="tour-empty">Не удалось загрузить туры. Обновите страницу позже.</div>';const detail=$('#tour-detail');if(detail)detail.innerHTML='<p>Не удалось загрузить информацию о туре.</p>'}}
+function catalogTourCard(tour){
+  const difficulty=escapeHtml(tour.difficulty||'Уточняется'),level=({'Лёгкий':1,'Средний':2,'Сложный':3})[tour.difficulty]||0;
+  const dots=Array.from({length:3},(_,i)=>`<i class="${i<level?'is-filled':''}"></i>`).join('');
+  return `<article class="tour-card catalog-tour-card"><div class="tour-card-media">${tour.image?`<img src="${escapeHtml(tour.image)}" alt="${escapeHtml(tour.title)}" loading="lazy" decoding="async">`:`<div class="media-placeholder"><span class="placeholder-mark">${icon('image-plus')}</span><strong>Фото путешествия</strong><small>Место для фотографии маршрута</small></div>`}<span class="region-tag">${icon('map-pin')}${escapeHtml(tour.region)}</span></div><div class="tour-card-body"><h3>${escapeHtml(tour.title)}</h3><div class="catalog-tour-meta"><span>${icon('calendar-days')}${escapeHtml(dateLabel(tour))}</span><span>${icon('clock-3')}${escapeHtml(tour.duration||'Уточняется')}</span></div><span class="catalog-difficulty" data-difficulty="${difficulty}"><span class="difficulty-dots" aria-hidden="true">${dots}</span>${difficulty}</span><div class="tour-card-footer"><div class="tour-price">${tour.price?'<small>от </small>':''}${money(tour.price)}</div><a class="button button-gold catalog-tour-link" href="/tour/${encodeURIComponent(tour.slug)}" aria-label="Подробнее: ${escapeHtml(tour.title)}">Подробнее${icon('arrow-right').replace('ui-icon','ui-icon button-arrow')}</a></div></div></article>`;
+}
+function renderTours(){
+  const grid=$('#tour-grid');if(!grid)return;
+  if(catalogFilters&&!validateCatalogFilters())return;
+  const filtered=tours.filter(tour=>{
+    if(selectedRegion!=='all'&&tour.region!==selectedRegion||selectedDifficulty!=='all'&&tour.difficulty!==selectedDifficulty)return false;
+    if(!catalogFilters)return true;
+    const start=tour.startDate||tour.endDate,end=tour.endDate||tour.startDate;
+    if((catalogState.from||catalogState.to)&&(!start||!end))return false;
+    if(catalogState.from&&end<catalogState.from||catalogState.to&&start>catalogState.to)return false;
+    const price=Number(tour.price);
+    if((catalogState.min!==''||catalogState.max!=='')&&!(price>0))return false;
+    if(catalogState.min!==''&&price<Number(catalogState.min)||catalogState.max!==''&&price>Number(catalogState.max))return false;
+    return true;
+  });
+  const byDate=(a,b)=>(a.startDate||'9999').localeCompare(b.startDate||'9999');
+  if(catalogFilters)filtered.sort((a,b)=>{if(catalogState.sort==='date')return byDate(a,b);const x=Number(a.price),y=Number(b.price);if(!(x>0)||!(y>0))return (x>0?-1:0)+(y>0?1:0);return (catalogState.sort==='price-asc'?x-y:y-x)||byDate(a,b)});
+  grid.innerHTML=filtered.length?filtered.map(catalogFilters?catalogTourCard:tourCard).join(''):catalogFilters?'<div class="catalog-empty"><h2>По этим параметрам туров пока нет</h2><p>Попробуйте другое направление, период или диапазон стоимости.</p><button class="button button-line" type="button" data-reset-catalog>Сбросить фильтры</button></div>':'<div class="tour-empty"><h3>По этому запросу туров пока нет</h3><p>Выберите другое направление или оставьте заявку — поможем найти подходящий маршрут.</p></div>';
+  grid.setAttribute('aria-busy','false');
+  const count=$('#tour-count');if(count)count.textContent=`${filtered.length} ${filtered.length===1?'тур':filtered.length>=2&&filtered.length<=4?'тура':'туров'}`;
+  if(catalogFilters){syncCatalogControls();updateCatalogUrl();$('#catalog-results-status').textContent=`Найдено путешествий: ${filtered.length}. Показаны все подходящие варианты.`}
+  $$('.chip[data-region]').forEach(chip=>chip.classList.toggle('active',chip.dataset.region===selectedRegion));$$('.chip[data-tour-filter]').forEach(chip=>chip.classList.toggle('active',chip.dataset.tourFilter===selectedDifficulty));rewriteStaticLinks();
+}
+async function loadTours(){try{const res=await fetch(staticPreview?'./data/tours.json':'/api/tours');if(!res.ok)throw new Error('Failed');tours=(await res.json()).filter(tour=>tour.published!==false);tours.sort((a,b)=>(a.startDate||'9999').localeCompare(b.startDate||'9999'));initializeCatalogFilters();renderTours();renderTourDetail();rewriteStaticLinks()}catch{const grid=$('#tour-grid');if(grid){grid.setAttribute('aria-busy','false');grid.innerHTML='<div class="tour-empty">Не удалось загрузить туры. Обновите страницу позже.</div>'}const detail=$('#tour-detail');if(detail)detail.innerHTML='<p>Не удалось загрузить информацию о туре.</p>'}}
 if($('#tour-grid')||$('#tour-detail'))loadTours();
 if(!staticPreview&&$('[data-photo-slot]'))fetch('/api/site-images').then(response=>response.json()).then(images=>{$$('[data-photo-slot]').forEach(slot=>{const url=images[slot.dataset.photoSlot];if(!url)return;slot.classList.add('photo-filled');if(slot.classList.contains('panoramic-transition')){slot.style.setProperty('--transition-image',`url(${JSON.stringify(new URL(url,location.href).href)})`);slot.replaceChildren();return}slot.innerHTML=`<img src="${escapeHtml(url)}" alt="${escapeHtml(slot.textContent.trim().replace(/\s+/g,' '))}">`})}).catch(()=>{});
-if(location.pathname==='/tours'||staticPreview&&location.pathname.endsWith('/catalog.html')){const toolbar=$('.tour-toolbar');if(toolbar){const difficulty=document.createElement('div');difficulty.className='filter-chips difficulty-chips';difficulty.setAttribute('role','group');difficulty.setAttribute('aria-label','Сложность');difficulty.innerHTML='<button type="button" class="chip active" data-tour-filter="all">Любая сложность</button><button type="button" class="chip" data-tour-filter="Лёгкий">Лёгкий</button><button type="button" class="chip" data-tour-filter="Средний">Средний</button><button type="button" class="chip" data-tour-filter="Сложный">Сложный</button>';toolbar.after(difficulty)}}
 function smoothScrollTo(target){if(!target)return;const start=window.scrollY;const end=Math.max(0,target.getBoundingClientRect().top+start-8);const distance=end-start;const duration=Math.min(900,Math.max(480,Math.abs(distance)*.28));let began;const tick=time=>{began??=time;const t=Math.min(1,(time-began)/duration);const eased=1-Math.pow(1-t,3);window.scrollTo(0,start+distance*eased);if(t<1)requestAnimationFrame(tick)};requestAnimationFrame(tick)}
 $$('[data-region]').forEach(el=>el.addEventListener('click',event=>{selectedRegion=el.dataset.region;selectedDifficulty='all';renderTours();if(el.matches('a')){event.preventDefault();smoothScrollTo(document.getElementById('tours'));el.closest('details')?.removeAttribute('open')}}));
 $$('[data-tour-filter]').forEach(el=>el.addEventListener('click',event=>{event.preventDefault();selectedDifficulty=el.dataset.tourFilter;selectedRegion='all';renderTours();smoothScrollTo(document.getElementById('tours'));el.closest('details')?.removeAttribute('open')}));
