@@ -130,7 +130,7 @@ $$('[data-carousel]').forEach(carousel=>{
   const makeCopy=slide=>{const copy=slide.cloneNode(true);copy.removeAttribute('id');copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));copy.setAttribute('aria-hidden','true');copy.inert=true;return copy};
   // Keep the viewport in the middle copy. Moving one full cycle is visually identical,
   // including a freely dragged partial slide; no scrollend event or snapping is needed.
-  const normalize=()=>{if(!cycle)return;const offset=track.scrollLeft-middle;const shift=-Math.floor((offset+.5)/cycle)*cycle;if(Math.abs(shift)<1)return;track.scrollLeft+=shift;if(drag)drag.left+=shift;if(animation){animation.from+=shift;animation.to+=shift}};
+  const normalize=()=>{if(!cycle)return;const offset=track.scrollLeft-middle;const shift=-Math.floor((offset+.5)/cycle)*cycle;if(Math.abs(shift)<1)return;track.scrollLeft+=shift;if(drag)drag.left+=shift;if(animation){animation.position+=shift;animation.target+=shift}};
   const measure=()=>{if(!slides.length)return;const bounds=track.getBoundingClientRect();const first=slides[size].getBoundingClientRect();cycle=slides[size*2].getBoundingClientRect().left-first.left;middle=track.scrollLeft+first.left-bounds.left-(gallery&&!mobile?(bounds.width-first.width)/2:0)};
   const rebuild=()=>{
     cancelAnimation();drag=null;track.classList.remove('is-dragging');mobile=matchMedia('(max-width:700px)').matches;
@@ -139,8 +139,17 @@ $$('[data-carousel]').forEach(carousel=>{
     originals.forEach(slide=>{const photos=slide.matches('.gallery-photo')?[slide]:$$('.gallery-photo',slide);photos.forEach(photo=>{const filled=filledPhotos.get(photo.dataset.photoSlot);if(filled){photo.className=filled.className;photo.innerHTML=filled.innerHTML}})});size=originals.length;
     track.replaceChildren(...originals.map(makeCopy),...originals,...originals.map(makeCopy));slides=Array.from(track.children);measure();track.scrollLeft=middle;
   };
-  const tick=time=>{if(!animation)return;animation.began??=time;const t=Math.min(1,(time-animation.began)/460);const eased=1-Math.pow(1-t,3);track.scrollLeft=animation.from+(animation.to-animation.from)*eased;normalize();if(t<1)frame=requestAnimationFrame(tick);else{animation=null;frame=0}};
-  const go=direction=>{const remaining=animation?animation.to-track.scrollLeft:0;cancelAnimation();normalize();const distance=slides[size+1].getBoundingClientRect().left-slides[size].getBoundingClientRect().left;if(reducedMotion.matches){track.scrollLeft+=distance*direction;normalize();return}animation={from:track.scrollLeft,to:track.scrollLeft+remaining+distance*direction,began:null};frame=requestAnimationFrame(tick)};
+  // Critically damped motion preserves velocity on repeated clicks and at loop seams.
+  const tick=time=>{
+    if(!animation)return;
+    const elapsed=Math.min(50,animation.previous==null?16:time-animation.previous)/1000;animation.previous=time;
+    const omega=reducedMotion.matches?28:10,error=animation.position-animation.target,decay=Math.exp(-omega*elapsed),step=(animation.velocity+omega*error)*elapsed;
+    animation.position=animation.target+(error+step)*decay;animation.velocity=(animation.velocity-omega*step)*decay;
+    track.scrollLeft=animation.position;normalize();
+    if(Math.abs(animation.target-animation.position)<.4&&Math.abs(animation.velocity)<4){track.scrollLeft=animation.target;normalize();cancelAnimation();return}
+    frame=requestAnimationFrame(tick);
+  };
+  const go=direction=>{normalize();const distance=slides[size+1].getBoundingClientRect().left-slides[size].getBoundingClientRect().left;if(animation){animation.target+=distance*direction;return}animation={position:track.scrollLeft,target:track.scrollLeft+distance*direction,velocity:0,previous:null};frame=requestAnimationFrame(tick)};
   next?.addEventListener('click',()=>go(1));
   track.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();go(event.key==='ArrowRight'?1:-1)}});
   track.addEventListener('scroll',normalize,{passive:true});

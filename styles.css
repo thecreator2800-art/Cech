@@ -444,3 +444,14 @@
 .review-intro .eyebrow-line{width:32px;margin-left:10px}
 @media(max-width:700px){.reviews-section{padding-bottom:12px}.reviews-faq-transition{height:130px;background-size:auto 200px}.faq-section{padding-top:22px}}
 @media(prefers-reduced-motion:reduce){.faq-answer,.faq-toggle,.faq-item,.button,.button .button-arrow,.contact-dialog[open],.contact-dialog::backdrop{transition:none}}
+
+/* Small transparent gear illustrations replace the old oval background contours. */
+.topo,.reviews-section,.faq-section{background-image:none}
+.tours-section,.trust-section,.faq-section{isolation:isolate}
+.tours-section::before,.trust-section::before,.faq-section::before{content:"";position:absolute;z-index:-1;background-repeat:no-repeat;background-position:center;background-size:contain;opacity:.12;pointer-events:none;user-select:none;-webkit-user-select:none}
+.tours-section::before{width:230px;height:160px;top:14px;right:-25px;background-image:url('assets/decor-carabiner.png');transform:rotate(-14deg)}
+.trust-section::before{width:180px;height:180px;top:8px;right:-12px;background-image:url('assets/decor-backpack.png');transform:rotate(10deg);opacity:.10}
+.faq-section::before{width:250px;height:180px;left:-35px;bottom:24px;background-image:url('assets/decor-map-compass.png');transform:rotate(-10deg);opacity:.10}
+.footer .footer-bottom .footer-tagline{display:block;margin-left:auto;text-align:right;line-height:1.5}
+@media(max-width:1050px){.tours-section::before{width:190px;height:130px;right:-30px}.trust-section::before{width:150px;height:160px;right:-28px}.faq-section::before{width:190px;height:140px;left:-35px}}
+@media(max-width:700px){.tours-section::before{width:140px;height:100px;top:12px;right:-35px;opacity:.09}.trust-section::before{width:115px;height:125px;top:2px;right:-28px;opacity:.08}.faq-section::before{width:150px;height:110px;left:-40px;bottom:12px;opacity:.08}.footer .footer-bottom .footer-tagline{flex-basis:100%;margin-left:0;text-align:left;font-size:11px}}
