@@ -445,13 +445,17 @@
 @media(max-width:700px){.reviews-section{padding-bottom:12px}.reviews-faq-transition{height:130px;background-size:auto 200px}.faq-section{padding-top:22px}}
 @media(prefers-reduced-motion:reduce){.faq-answer,.faq-toggle,.faq-item,.button,.button .button-arrow,.contact-dialog[open],.contact-dialog::backdrop{transition:none}}
 
-/* Small transparent gear illustrations replace the old oval background contours. */
+/* Six readable gear accents stay in the padding, away from section content. */
 .topo,.reviews-section,.faq-section{background-image:none}
-.tours-section,.trust-section,.faq-section{isolation:isolate}
-.tours-section::before,.trust-section::before,.faq-section::before{content:"";position:absolute;z-index:-1;background-repeat:no-repeat;background-position:center;background-size:contain;opacity:.12;pointer-events:none;user-select:none;-webkit-user-select:none}
-.tours-section::before{width:230px;height:160px;top:14px;right:-25px;background-image:url('assets/decor-carabiner.png');transform:rotate(-14deg)}
-.trust-section::before{width:180px;height:180px;top:8px;right:-12px;background-image:url('assets/decor-backpack.png');transform:rotate(10deg);opacity:.10}
-.faq-section::before{width:250px;height:180px;left:-35px;bottom:24px;background-image:url('assets/decor-map-compass.png');transform:rotate(-10deg);opacity:.10}
+.tours-section,.trust-section,.guides-section,.reviews-section,.faq-section{isolation:isolate}
+.tours-section::before,.trust-section::before,.guides-section::before,.reviews-section::before,.faq-section::before,.faq-section::after{content:"";position:absolute;z-index:-1;background-repeat:no-repeat;background-position:center;background-size:contain;opacity:.42;pointer-events:none;user-select:none;-webkit-user-select:none}
+.tours-section::before{width:230px;height:120px;top:0;right:12px;background-image:url('assets/decor-carabiner.png');transform:rotate(-10deg)}
+.trust-section::before{width:120px;height:75px;top:0;right:14px;background-image:url('assets/decor-backpack.png');transform:rotate(8deg);opacity:.38}
+.guides-section::before{width:200px;height:105px;top:0;right:30px;background-image:url('assets/decor-map-compass.png');transform:rotate(8deg);opacity:.34}
+.reviews-section::before{width:130px;height:90px;top:0;left:0;background-image:url('assets/decor-backpack.png');transform:rotate(-12deg);opacity:.36}
+.faq-section{padding-bottom:125px}
+.faq-section::before{width:185px;height:100px;left:5px;bottom:8px;background-image:url('assets/decor-map-compass.png');transform:rotate(-6deg);opacity:.40}
+.faq-section::after{width:190px;height:110px;right:16px;bottom:8px;background-image:url('assets/decor-carabiner.png');transform:rotate(15deg);opacity:.42}
 .footer .footer-bottom .footer-tagline{display:block;margin-left:auto;text-align:right;line-height:1.5}
-@media(max-width:1050px){.tours-section::before{width:190px;height:130px;right:-30px}.trust-section::before{width:150px;height:160px;right:-28px}.faq-section::before{width:190px;height:140px;left:-35px}}
-@media(max-width:700px){.tours-section::before{width:140px;height:100px;top:12px;right:-35px;opacity:.09}.trust-section::before{width:115px;height:125px;top:2px;right:-28px;opacity:.08}.faq-section::before{width:150px;height:110px;left:-40px;bottom:12px;opacity:.08}.footer .footer-bottom .footer-tagline{flex-basis:100%;margin-left:0;text-align:left;font-size:11px}}
+@media(max-width:1050px){.tours-section::before{width:180px;height:90px;right:4px}.trust-section::before{width:110px;height:70px;right:4px}.guides-section::before{width:160px;height:80px;right:8px}.reviews-section::before{width:110px;height:70px;left:0}}
+@media(max-width:700px){.tours-section::before{width:135px;height:65px;right:0;opacity:.40}.trust-section::before{width:90px;height:55px;right:0;opacity:.36}.guides-section::before{width:130px;height:60px;right:4px;opacity:.38}.reviews-section::before{width:90px;height:50px;left:0;opacity:.36}.faq-section{padding-bottom:110px}.faq-section::before{width:150px;height:85px;left:-10px;bottom:7px;opacity:.38}.faq-section::after{width:145px;height:90px;right:-4px;bottom:7px;opacity:.40}.footer .footer-bottom .footer-tagline{flex-basis:100%;margin-left:0;text-align:left;font-size:11px}}
