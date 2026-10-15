@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ossetia",
+    "slug": "severnaya-osetiya",
+    "title": "Походы и туры в Северную Осетию",
+    "summary": "Маршруты и ближайшие путешествия клуба по Северной Осетии.",
+    "description": "",
+    "program": [],
+    "included": "",
+    "notIncluded": "",
+    "image": "",
+    "published": true,
+    "demo": true,
+    "seoNoindex": true
+  },
+  {
+    "id": "voronezh",
+    "slug": "voronezhskaya-oblast",
+    "title": "Походы по Воронежской области",
+    "summary": "Дивногорье и другие маршруты клуба по Воронежской области.",
+    "description": "",
+    "program": [],
+    "included": "",
+    "notIncluded": "",
+    "image": "",
+    "published": true,
+    "demo": true,
+    "seoNoindex": true
+  },
+  {
+    "id": "prielbrusie",
+    "slug": "prielbrusie",
+    "title": "Треккинг в Приэльбрусье",
+    "summary": "Треккинговые маршруты и путешествия клуба в Приэльбрусье.",
+    "description": "",
+    "program": [],
+    "included": "",
+    "notIncluded": "",
+    "image": "",
+    "published": true,
+    "demo": true,
+    "seoNoindex": true
+  },
+  {
+    "id": "elbrus",
+    "slug": "voskhozhdenie-na-elbrus",
+    "title": "Восхождение на Эльбрус",
+    "summary": "Программы восхождения, подготовка и ближайшие выезды клуба.",
+    "description": "",
+    "program": [],
+    "included": "",
+    "notIncluded": "",
+    "image": "",
+    "published": true,
+    "demo": true,
+    "seoNoindex": true
+  }
+]

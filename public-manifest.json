@@ -1,0 +1,23 @@
+[
+  "index.html",
+  "catalog.html",
+  "tour/trekking-k-ozeru-gizhgit/index.html",
+  "tour/vykhodnye-v-severnoy-osetii/index.html",
+  "tour/pokhod-po-divnogoryu/index.html",
+  "tour/voskhozhdenie-na-elbrus/index.html",
+  "directions/severnaya-osetiya/index.html",
+  "directions/voronezhskaya-oblast/index.html",
+  "directions/prielbrusie/index.html",
+  "directions/voskhozhdenie-na-elbrus/index.html",
+  "tour.html",
+  "privacy.html",
+  "404.html",
+  "styles.css",
+  "app.js",
+  "data/tours.json",
+  "data/directions.json",
+  "sitemap.xml",
+  "robots.txt",
+  ".nojekyll",
+  "README.md"
+]

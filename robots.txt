@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Sitemap: https://thecreator2800-art.github.io/Cech/sitemap.xml
