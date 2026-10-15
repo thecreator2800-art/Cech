@@ -301,3 +301,32 @@ const setFaqOpen=(button,open,animate=true)=>{
   faqAnimations.set(answer,animation);animation.onfinish=()=>faqAnimations.delete(answer);
 };
 faqButtons.forEach(button=>{setFaqOpen(button,false,false);button.addEventListener('click',()=>{const open=button.getAttribute('aria-expanded')!=='true';faqButtons.forEach(other=>{if(other!==button&&other.getAttribute('aria-expanded')==='true')setFaqOpen(other,false)});setFaqOpen(button,open)})});
+
+// Route days are native details without JS; enhanced animation keeps several
+// days open and reverses from the current height on rapid repeated clicks.
+const dayAnimations=new WeakMap();
+$$('.route-day').forEach(detail=>{
+  const summary=detail.querySelector('summary');summary.setAttribute('aria-expanded',String(detail.open));
+  summary.addEventListener('click',event=>{
+    event.preventDefault();const open=summary.getAttribute('aria-expanded')!=='true',startHeight=detail.getBoundingClientRect().height;
+    dayAnimations.get(detail)?.cancel();summary.setAttribute('aria-expanded',String(open));
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches||!detail.animate){detail.open=open;return}
+    detail.open=true;const endHeight=open?detail.scrollHeight:summary.getBoundingClientRect().height;
+    const animation=detail.animate([{height:startHeight+'px'},{height:endHeight+'px'}],{duration:480,easing:'cubic-bezier(.22,.65,.3,1)'});dayAnimations.set(detail,animation);
+    animation.onfinish=()=>{if(dayAnimations.get(detail)!==animation)return;detail.open=open;dayAnimations.delete(detail)};
+  });
+});
+const routeDates=$('.route-departure-picker');
+if(routeDates){
+  const summary=routeDates.querySelector('summary'),options=$$('[data-route-departure]',routeDates),interest=$('#contact-form [name="interest"]'),baseInterest=interest?.value||'';
+  const close=()=>{routeDates.open=false;summary.setAttribute('aria-expanded','false')};
+  summary.setAttribute('aria-haspopup','listbox');summary.setAttribute('aria-expanded','false');
+  const select=option=>{options.forEach(item=>item.setAttribute('aria-selected',String(item===option)));$('[data-route-date-value]',routeDates).textContent=option.dataset.routeDeparture;if(interest){interest.value=baseInterest+' · '+option.dataset.routeDeparture;interest.defaultValue=interest.value}};
+  if(options[0])select(options[0]);
+  summary.addEventListener('click',event=>{event.preventDefault();routeDates.open=!routeDates.open;summary.setAttribute('aria-expanded',String(routeDates.open))});
+  options.forEach(option=>option.addEventListener('click',()=>{select(option);close();summary.focus({preventScroll:true})}));
+  routeDates.addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();routeDates.open=true;summary.setAttribute('aria-expanded','true');const current=options.indexOf(document.activeElement),next=event.key==='Home'?0:event.key==='End'?options.length-1:current<0?Math.max(0,options.findIndex(item=>item.getAttribute('aria-selected')==='true')):(current+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;options[next]?.focus()}});
+  document.addEventListener('pointerdown',event=>{if(!routeDates.contains(event.target))close()});
+  document.addEventListener('focusin',event=>{if(!routeDates.contains(event.target))close()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&routeDates.open){close();summary.focus({preventScroll:true})}});
+}
