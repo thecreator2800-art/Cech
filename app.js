@@ -30,6 +30,33 @@ $('#year')?.replaceChildren(document.createTextNode(new Date().getFullYear()));
 let tours=[];let selectedRegion='all';let selectedDifficulty='all';
 const catalogFilters=$('#catalog-filters');
 const catalogState={from:'',to:'',min:'',max:'',sort:'date'};
+let catalogDateField='from',catalogCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+const catalogChoices={region:[],difficulty:[['all','Любая сложность'],['Лёгкий','Лёгкий'],['Средний','Средний'],['Сложный','Сложный']],sort:[['date','Ближайшие даты'],['price-asc','Сначала дешевле'],['price-desc','Сначала дороже']]};
+function setCatalogPopover(detail,open){
+  $$('.catalog-range').forEach(other=>{if(other===detail||open){other.open=other===detail&&open;other.querySelector('summary').setAttribute('aria-expanded',String(other.open))}});
+}
+function renderCatalogChoices(){
+  $$('.catalog-choice').forEach(detail=>{
+    const key=detail.dataset.catalogChoice,value=$(`#catalog-${key}`).value,options=catalogChoices[key];
+    const label=options.find(option=>option[0]===value)?.[1]||'';
+    $('[data-choice-value]',detail).textContent=label;$('summary',detail).title=label;
+    $('.catalog-choice-popover',detail).innerHTML=options.map(([id,text])=>`<button type="button" role="option" aria-selected="${id===value}" data-choice-option="${escapeHtml(id)}">${key==='difficulty'&&id!=='all'?`<i class="catalog-option-dot" data-difficulty="${escapeHtml(id)}" aria-hidden="true"></i>`:''}<span>${escapeHtml(text)}</span><span class="catalog-option-check" aria-hidden="true">✓</span></button>`).join('');
+  });
+}
+function renderCatalogCalendar(){
+  if(!catalogFilters)return;
+  const dateText=value=>new Date(value+'T00:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+  ['from','to'].forEach(key=>{const button=$(`[data-edit-date="${key}"]`);button.textContent=catalogState[key]?dateText(catalogState[key]):'Выбрать дату';button.setAttribute('aria-pressed',String(key===catalogDateField));$(`[data-clear-date="${key}"]`).hidden=!catalogState[key]});
+  $('#catalog-calendar-hint').textContent=catalogDateField==='from'?'Выберите начало периода.':'Выберите окончание периода. Покажем все пересекающиеся поездки.';
+  const year=catalogCalendarMonth.getFullYear(),month=catalogCalendarMonth.getMonth(),offset=(catalogCalendarMonth.getDay()+6)%7,days=new Date(year,month+1,0).getDate();
+  const iso=day=>`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const today=new Date(),todayIso=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const cells=Array.from({length:offset},()=>'<span></span>').join('')+Array.from({length:days},(_,index)=>{
+    const day=index+1,value=iso(day),selected=value===catalogState.from||value===catalogState.to,inRange=catalogState.from&&catalogState.to&&value>catalogState.from&&value<catalogState.to;
+    return `<button type="button" data-calendar-day="${value}" class="${selected?'is-selected ':''}${inRange?'in-range':''}" aria-label="${escapeHtml(new Date(year,month,day).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))}" aria-pressed="${selected}" ${value===todayIso?'aria-current="date"':''}>${day}</button>`;
+  }).join('');
+  $('.catalog-calendar').innerHTML=`<div class="catalog-calendar-heading"><button type="button" data-calendar-month="-1" aria-label="Предыдущий месяц">${icon('chevron-down')}</button><strong aria-live="polite">${catalogCalendarMonth.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}</strong><button type="button" data-calendar-month="1" aria-label="Следующий месяц">${icon('chevron-down')}</button></div><div class="catalog-calendar-week" aria-hidden="true">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(day=>`<span>${day}</span>`).join('')}</div><div class="catalog-calendar-days">${cells}</div>`;
+}
 function syncCatalogControls(){
   if(!catalogFilters)return;
   $('#catalog-region').value=selectedRegion;$('#catalog-difficulty').value=selectedDifficulty;$('#catalog-sort').value=catalogState.sort;
@@ -41,6 +68,7 @@ function syncCatalogControls(){
   $('#catalog-dates-value').textContent=dates;$('#catalog-price-value').textContent=price;
   $('#catalog-dates-value').title=[catalogState.from,catalogState.to].filter(Boolean).join(' — ');$('#catalog-price-value').title=price;
   $$('[data-reset-catalog]',catalogFilters).forEach(button=>button.disabled=selectedRegion==='all'&&selectedDifficulty==='all'&&!catalogState.from&&!catalogState.to&&!catalogState.min&&!catalogState.max&&catalogState.sort==='date');
+  renderCatalogChoices();renderCatalogCalendar();
 }
 function validateCatalogFilters(){
   if(!catalogFilters)return true;
@@ -59,16 +87,16 @@ function updateCatalogUrl(){
   Object.entries(values).forEach(([key,value])=>{if(value!=='')url.searchParams.set(key,value);else url.searchParams.delete(key)});history.replaceState(null,'',url);
 }
 function resetCatalogFilters(){
-  selectedRegion='all';selectedDifficulty='all';Object.assign(catalogState,{from:'',to:'',min:'',max:'',sort:'date'});$$('.catalog-range').forEach(detail=>detail.open=false);renderTours();
+  selectedRegion='all';selectedDifficulty='all';Object.assign(catalogState,{from:'',to:'',min:'',max:'',sort:'date'});catalogDateField='from';setCatalogPopover(null,true);renderTours();
 }
 function initializeCatalogFilters(){
   if(!catalogFilters)return;
-  const regionSelect=$('#catalog-region'),regions=[...new Set(tours.map(tour=>tour.region).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));
-  regionSelect.replaceChildren(new Option('Все направления','all'),...regions.map(region=>new Option(region,region)));
+  const regions=[...new Set(tours.map(tour=>tour.region).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ru'));
+  catalogChoices.region=[['all','Все направления'],...regions.map(region=>[region,region])];
   const params=new URL(location.href).searchParams;
   selectedRegion=regions.includes(params.get('region'))?params.get('region'):'all';selectedDifficulty=['Лёгкий','Средний','Сложный'].includes(params.get('difficulty'))?params.get('difficulty'):'all';
   catalogState.sort=['date','price-asc','price-desc'].includes(params.get('sort'))?params.get('sort'):'date';
-  [['#catalog-date-from','from'],['#catalog-date-to','to']].forEach(([selector,key])=>{const field=$(selector);field.value=params.get(key)||'';catalogState[key]=field.value});
+  [['#catalog-date-from','from'],['#catalog-date-to','to']].forEach(([selector,key])=>{const value=params.get(key)||'',valid=/^\d{4}-\d{2}-\d{2}$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value;$(selector).value=valid?value:'';catalogState[key]=$(selector).value});
   ['min','max'].forEach(key=>{const value=params.get(key);catalogState[key]=value!==null&&value!==''&&Number.isFinite(Number(value))&&Number(value)>=0?String(Number(value)):''});
   if(catalogState.from&&catalogState.to&&catalogState.from>catalogState.to){catalogState.from='';catalogState.to=''}
   if(catalogState.min!==''&&catalogState.max!==''&&Number(catalogState.min)>Number(catalogState.max)){catalogState.min='';catalogState.max=''}
@@ -76,11 +104,26 @@ function initializeCatalogFilters(){
 }
 if(catalogFilters){
   const apply=()=>{selectedRegion=$('#catalog-region').value;selectedDifficulty=$('#catalog-difficulty').value;catalogState.sort=$('#catalog-sort').value;catalogState.from=$('#catalog-date-from').value;catalogState.to=$('#catalog-date-to').value;catalogState.min=$('#catalog-price-min').value;catalogState.max=$('#catalog-price-max').value;$$('[data-reset-catalog]',catalogFilters).forEach(button=>button.disabled=false);if(validateCatalogFilters())renderTours()};
-  catalogFilters.addEventListener('input',apply);catalogFilters.addEventListener('submit',event=>{event.preventDefault();apply();if(validateCatalogFilters())$$('.catalog-range').forEach(detail=>detail.open=false)});
-  catalogFilters.addEventListener('click',event=>{if(event.target.closest('[data-reset-catalog]'))resetCatalogFilters();const close=event.target.closest('[data-close-catalog-range]');if(close&&validateCatalogFilters()){const detail=close.closest('details');detail.open=false;detail.querySelector('summary').focus()}});
-  $$('.catalog-range').forEach(detail=>detail.addEventListener('toggle',()=>{if(detail.open)$$('.catalog-range').forEach(other=>{if(other!==detail)other.open=false})}));
-  document.addEventListener('pointerdown',event=>{if(!event.target.closest('.catalog-range'))$$('.catalog-range').forEach(detail=>detail.open=false)});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape')$$('.catalog-range').forEach(detail=>detail.open=false)});
+  catalogFilters.addEventListener('input',apply);catalogFilters.addEventListener('submit',event=>{event.preventDefault();apply();if(validateCatalogFilters())setCatalogPopover(null,true)});
+  catalogFilters.addEventListener('click',event=>{
+    const summary=event.target.closest('.catalog-range>summary');if(summary){event.preventDefault();const detail=summary.parentElement,open=!detail.open;setCatalogPopover(detail,open);if(open&&detail.classList.contains('catalog-dates')){const value=catalogState[catalogDateField]||catalogState.from||tours.find(tour=>tour.startDate)?.startDate;if(value){const date=new Date(value+'T00:00:00');catalogCalendarMonth=new Date(date.getFullYear(),date.getMonth(),1)}renderCatalogCalendar()}return}
+    if(event.target.closest('[data-reset-catalog]'))resetCatalogFilters();
+    const option=event.target.closest('[data-choice-option]');if(option){const detail=option.closest('.catalog-choice');$(`#catalog-${detail.dataset.catalogChoice}`).value=option.dataset.choiceOption;apply();setCatalogPopover(detail,false);$('summary',detail).focus()}
+    const edit=event.target.closest('[data-edit-date]');if(edit){catalogDateField=edit.dataset.editDate;const value=catalogState[catalogDateField];if(value){const date=new Date(value+'T00:00:00');catalogCalendarMonth=new Date(date.getFullYear(),date.getMonth(),1)}renderCatalogCalendar();$(`[data-edit-date="${catalogDateField}"]`).focus()}
+    const clear=event.target.closest('[data-clear-date]');if(clear){const key=clear.dataset.clearDate;$(`#catalog-date-${key}`).value='';catalogDateField=key;apply();$(`[data-edit-date="${key}"]`).focus()}
+    const month=event.target.closest('[data-calendar-month]');if(month){const direction=Number(month.dataset.calendarMonth);catalogCalendarMonth=new Date(catalogCalendarMonth.getFullYear(),catalogCalendarMonth.getMonth()+direction,1);renderCatalogCalendar();$(`[data-calendar-month="${direction}"]`).focus()}
+    const day=event.target.closest('[data-calendar-day]');if(day){const value=day.dataset.calendarDay;if(catalogDateField==='from'){$('#catalog-date-from').value=value;if(catalogState.to&&value>catalogState.to)$('#catalog-date-to').value='';catalogDateField='to'}else if(catalogState.from&&value<catalogState.from){$('#catalog-date-from').value=value;$('#catalog-date-to').value=''}else{$('#catalog-date-to').value=value}apply();$(`[data-calendar-day="${value}"]`).focus()}
+    const close=event.target.closest('[data-close-catalog-range]');if(close&&validateCatalogFilters()){const detail=close.closest('details');setCatalogPopover(detail,false);detail.querySelector('summary').focus()}
+  });
+  $$('.catalog-range>summary').forEach(summary=>summary.setAttribute('aria-expanded','false'));
+  $$('.catalog-choice').forEach(detail=>{const list=$('.catalog-choice-popover',detail);list.id=`catalog-options-${detail.dataset.catalogChoice}`;$('summary',detail).setAttribute('aria-controls',list.id);$('summary',detail).setAttribute('aria-haspopup','listbox')});
+  catalogFilters.addEventListener('keydown',event=>{
+    const detail=event.target.closest('.catalog-choice');if(detail&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();setCatalogPopover(detail,true);const options=$$('[data-choice-option]',detail),index=options.indexOf(document.activeElement);let next=event.key==='Home'?0:event.key==='End'?options.length-1:index<0?Math.max(0,options.findIndex(option=>option.getAttribute('aria-selected')==='true')):(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;options[next]?.focus()}
+    const day=event.target.closest('[data-calendar-day]');if(day&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();const date=new Date(day.dataset.calendarDay+'T00:00:00');date.setDate(date.getDate()+({ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7})[event.key]);catalogCalendarMonth=new Date(date.getFullYear(),date.getMonth(),1);renderCatalogCalendar();const value=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;$(`[data-calendar-day="${value}"]`)?.focus()}
+  });
+  document.addEventListener('pointerdown',event=>{if(!event.target.closest('.catalog-range'))setCatalogPopover(null,true)});
+  document.addEventListener('focusin',event=>{$$('.catalog-range[open]').forEach(detail=>{if(!detail.contains(event.target))setCatalogPopover(detail,false)})});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){const detail=$('.catalog-range[open]');setCatalogPopover(null,true);detail?.querySelector('summary').focus()}});
   $('#tour-grid').addEventListener('click',event=>{if(event.target.closest('[data-reset-catalog]'))resetCatalogFilters()});
 }
 const dateLabel=tour=>{if(!tour.startDate)return 'Дата уточняется';const start=new Date(tour.startDate+'T00:00:00');const end=tour.endDate?new Date(tour.endDate+'T00:00:00'):null;const fmt=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short'});return end?`${fmt.format(start)} — ${fmt.format(end)}`:fmt.format(start)};
